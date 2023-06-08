@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNetCore.Components.RenderTree;
+@using Microsoft.JSInterop
+@using System.Reflection;
+@inject IJSRuntime JS
+@implements IDisposable
+@code {
+    private Task<IJSObjectReference> _moduleLoader = default!;
+    private bool _disposed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_disposed)
+        {
+            _moduleLoader = JS.InvokeAsync<IJSObjectReference>("import", "./_content/StatefulReconnection/Enable.razor.js").AsTask();
+
+            // We don't want to restore the UI until it's finished any loading tasks. There isn't a public API for observing
+            // quiescence so we'll bypass the problem with some reflection. If necessary a public API can be added.
+            var renderHandle = (RenderHandle)typeof(ComponentBase).GetField("_renderHandle", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
+            var renderer = (Renderer)typeof(RenderHandle).GetField("_renderer", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(renderHandle)!;
+            var waitForQuiescenceMethod = typeof(Renderer).GetMethod("WaitForQuiescence", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var quiescenceTask = (Task)waitForQuiescenceMethod.Invoke(renderer, null)!;
+            await quiescenceTask;
+
+            var module = await _moduleLoader;
+            if (!_disposed)
+            {
+                await module.InvokeVoidAsync("init");
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+    }
+}

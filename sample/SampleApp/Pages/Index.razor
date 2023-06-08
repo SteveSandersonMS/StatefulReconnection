@@ -6,4 +6,24 @@
 
 Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<button @onclick="@(() => count++)">Click @count</button>
+
+@if (ready)
+{
+    <p>
+        <input @bind="someText" />
+        [@someText]
+    </p>
+}
+
+@code {
+    int count;
+    bool ready;
+    string someText = "default";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        ready = true;
+    }
+}
