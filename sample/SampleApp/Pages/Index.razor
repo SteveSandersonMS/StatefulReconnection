@@ -11,19 +11,23 @@ Welcome to your new app.
 @if (ready)
 {
     <p>
-        <input @bind="someText" />
-        [@someText]
+        <span>Unrelated</span>
+        <input @bind="someText1" />
+        <input @bind="someText2" @bind:event="oninput" />
+        [@someText1]
+        [@someText2]
     </p>
 }
 
 @code {
     int count;
     bool ready;
-    string someText = "default";
+    string someText1 = "";
+    string someText2 = "";
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500);
+        //await Task.Delay(500);
         ready = true;
     }
 }
