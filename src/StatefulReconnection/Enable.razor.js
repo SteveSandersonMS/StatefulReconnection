@@ -1,6 +1,12 @@
 ﻿const sessionStorageKey = 'statefulReconnection.uiState';
+let isInitialized;
 
 export function init() {
+    if (isInitialized) {
+        throw new Error('Do not add more than one instance of <StatefulReconnection.Enable>');
+    }
+
+    isInitialized = true;
     loadUIState();
 
     const origOnConnectionDown = Blazor.defaultReconnectionHandler.onConnectionDown;
@@ -14,9 +20,6 @@ export function init() {
         clearUIState();
         return origOnConnectionUp.apply(this, arguments);
     }
-
-    // TODO: Remove this. It's only for testing. We should only store the state when Blazor says a connection was lost.
-    //saveUIState();
 }
 
 function loadUIState() {
