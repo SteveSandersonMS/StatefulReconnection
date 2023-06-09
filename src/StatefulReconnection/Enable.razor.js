@@ -74,6 +74,13 @@ function loadUIState() {
                 writeElementValue(elem, value);
             }
         }
+        
+        if (state.__activeElement) {
+            const activeElem = document.querySelector(state.__activeElement);
+            if (activeElem) {
+                activeElem.focus();
+            }
+        }
     }
 }
 
@@ -85,6 +92,10 @@ function saveUIState() {
         const selector = toQuerySelector(elem, selectorCacheMap);
         uiState[selector] = readElementValue(elem);
     });
+
+    if (document.activeElement) {
+        uiState.__activeElement = toQuerySelector(document.activeElement, selectorCacheMap);
+    }
 
     sessionStorage.setItem(sessionStorageKey, JSON.stringify(uiState));
 }
