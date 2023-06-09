@@ -10,6 +10,8 @@ This is an **experimental** alternative UX for reconnection in Blazor Server. On
    * If the page is reloaded (e.g., automatically because the server no longer has the user's circuit, or if the user reloads manually), then client-side JS code will attempt to restore the state of the form fields in the new page
    * It also preserves element focus across these circuit restarts
 
+![image](https://github.com/dotnet/aspnetcore/assets/1101362/e7d22948-8733-447d-a1b2-f6af3699edc7)
+
 The result is:
 
  * If the user is on a read-only page, then in many cases it will auto-reload and continue without user interaction
