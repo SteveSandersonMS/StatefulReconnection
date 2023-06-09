@@ -3,7 +3,16 @@
 @using System.Reflection
 @inject IJSRuntime JS
 @implements IDisposable
+
+<div class="reconnect-overlay" @ref="overlay">
+    <div class="reconnect-dialog">
+        <div class="lds-ripple"><div></div><div></div></div>
+        Rejoining the server...
+    </div>
+</div>
+
 @code {
+    private ElementReference overlay;
     private Task<IJSObjectReference> _moduleLoader = default!;
     private bool _disposed;
 
@@ -24,7 +33,7 @@
             var module = await _moduleLoader;
             if (!_disposed)
             {
-                await module.InvokeVoidAsync("init");
+                await module.InvokeVoidAsync("init", overlay);
             }
         }
     }

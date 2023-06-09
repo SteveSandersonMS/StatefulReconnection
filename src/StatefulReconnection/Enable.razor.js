@@ -1,7 +1,7 @@
 ﻿const sessionStorageKey = 'statefulReconnection.uiState';
 let isInitialized;
 
-export function init() {
+export function init(overlayElem) {
     if (isInitialized) {
         throw new Error('Do not add more than one instance of <StatefulReconnection.Enable>');
     }
@@ -9,10 +9,19 @@ export function init() {
     isInitialized = true;
     loadUIState();
 
+    Blazor.defaultReconnectionHandler._reconnectionDisplay = new BetterReconnectionDisplay(overlayElem);
+
     const origOnConnectionDown = Blazor.defaultReconnectionHandler.onConnectionDown;
-    Blazor.defaultReconnectionHandler.onConnectionDown = function() {
+    Blazor.defaultReconnectionHandler.onConnectionDown = function(options, error) {
         saveUIState();
-        return origOnConnectionDown.apply(this, arguments);
+
+        // If no custom options were set, change the defaults
+        if (options.maxRetries === 8 && options.retryIntervalMilliseconds === 20000) {
+            options.retryIntervalMilliseconds = 1000;
+            options.maxRetries = 10 * 60; // 10 minutes
+        }
+
+        return origOnConnectionDown.call(this, options, error);
     }
 
     const origOnConnectionUp = Blazor.defaultReconnectionHandler.onConnectionUp;
@@ -21,6 +30,32 @@ export function init() {
         return origOnConnectionUp.apply(this, arguments);
     }
 }
+
+class BetterReconnectionDisplay {
+    constructor(overlayElem) {
+        this.overlayElem = overlayElem;
+    }
+
+    show() {
+        this.overlayElem.classList.add('reconnect-visible');
+    }
+
+    update(currentAttempt) {
+        console.log('update');
+    }
+
+    hide() {
+        this.overlayElem.classList.remove('reconnect-visible');
+    }
+
+    failed() {
+        console.log('failed');
+    }
+
+    rejected() {
+        console.log('rejected');
+    }
+} 
 
 function loadUIState() {
     const stateJson = sessionStorage.getItem(sessionStorageKey);
