@@ -10,12 +10,27 @@ Welcome to your new app.
 
 @if (ready)
 {
+    <p>Textbox: <input @bind="someText1" /> [@someText1]</p>
+    <p>Textbox with input event: <input @bind="someText2" @bind:event="oninput" /> [@someText2]</p>
+    <p>Checkbox: <input type="checkbox" @bind="checkValue" /> [@checkValue]</p>
     <p>
-        <span>Unrelated</span>
-        <input @bind="someText1" />
-        <input @bind="someText2" @bind:event="oninput" />
-        [@someText1]
-        [@someText2]
+        Select:
+        <select @bind="@selectValue">
+            <option>First</option>
+            <option>Second</option>
+            <option>Third</option>
+        </select>
+        [@selectValue]
+    </p>
+    <p>Textarea: <textarea @bind="someText3"></textarea> [@someText3]</p>
+    <p>
+        Radio:
+        <InputRadioGroup @bind-Value="@radioValue">
+            <InputRadio Value="@("Val1")" /> Val1
+            <InputRadio Value="@("Val2")" /> Val2
+            <InputRadio Value="@("Val3")" /> Val3
+        </InputRadioGroup>
+        [@radioValue]
     </p>
 }
 
@@ -24,10 +39,14 @@ Welcome to your new app.
     bool ready;
     string someText1 = "";
     string someText2 = "";
+    string someText3 = "";
+    string? selectValue;
+    bool checkValue;
+    string? radioValue;
 
     protected override async Task OnInitializedAsync()
     {
-        //await Task.Delay(500);
+        await Task.Delay(500);
         ready = true;
     }
 }

@@ -122,13 +122,20 @@ function toQuerySelector(elem, cacheMap) {
 }
 
 function readElementValue(elem) {
-    // TODO: Handle things other than input
-    return elem.value;
+    if (elem.type === 'checkbox') {
+        return elem.checked;
+    } else {
+        return elem.value;
+    }
 }
 
 function writeElementValue(elem, value) {
-    // TODO: Handle things other than input
-    elem.value = value;
+    if (elem.type === 'checkbox') {
+        elem.checked = value;
+    } else {
+        elem.value = value;
+    }
+    
     elem.dispatchEvent(new Event('input', { 'bubbles': true }));
     elem.dispatchEvent(new Event('change', { 'bubbles': true }));
 }
