@@ -3,6 +3,7 @@
 @using System.Reflection
 @inject IJSRuntime JS
 @implements IDisposable
+@namespace Microsoft.AspNetCore.Components.Web
 
 <div class="reconnect-overlay" @ref="overlay">
     <div class="reconnect-dialog">
@@ -22,7 +23,7 @@
     {
         if (firstRender && !_disposed)
         {
-            _moduleLoader = JS.InvokeAsync<IJSObjectReference>("import", "./_content/StatefulReconnection/Enable.razor.js").AsTask();
+            _moduleLoader = JS.InvokeAsync<IJSObjectReference>("import", "./_content/StatefulReconnection/StatefulReconnection.razor.js").AsTask();
 
             // We don't want to restore the UI until it's finished any loading tasks. There isn't a public API for observing
             // quiescence so we'll bypass the problem with some reflection. If necessary a public API can be added.
