@@ -7,7 +7,9 @@
 <div class="reconnect-overlay" @ref="overlay">
     <div class="reconnect-dialog">
         <div class="lds-ripple"><div></div><div></div></div>
-        Rejoining the server...
+        <p>Rejoining the server...</p>
+        <p class="check-internet">Check your internet connection</p>
+        <button onclick="location.reload()" style="display: none">Reload</button>
     </div>
 </div>
 

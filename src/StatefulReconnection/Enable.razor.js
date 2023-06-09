@@ -34,26 +34,32 @@ export function init(overlayElem) {
 class BetterReconnectionDisplay {
     constructor(overlayElem) {
         this.overlayElem = overlayElem;
+        this.checkInternetElem = overlayElem.querySelector('.check-internet');
     }
 
     show() {
         this.overlayElem.classList.add('reconnect-visible');
+        this.checkInternetElem.style.display = 'none';
+        clearTimeout(this.showCheckConnectionTimer);
+        this.showCheckConnectionTimer = setTimeout(() => {
+            this.checkInternetElem.style.display = 'block';
+        }, 5000);
     }
 
     update(currentAttempt) {
-        console.log('update');
     }
 
     hide() {
         this.overlayElem.classList.remove('reconnect-visible');
+        clearTimeout(this.showCheckConnectionTimer);
     }
 
     failed() {
-        console.log('failed');
+        location.reload();
     }
 
     rejected() {
-        console.log('rejected');
+        location.reload();
     }
 } 
 
