@@ -98,17 +98,25 @@ function toQuerySelector(elem, cacheMap) {
         return cacheMap.get(elem);
     }
 
-    let nthOfTypeIndex = 1;
-    let sibling = elem.parentNode.firstElementChild;
-    while (sibling !== elem) {
-        if (sibling.tagName === elem.tagName) {
-            nthOfTypeIndex++;
+    let result;
+
+    if (elem.id) {
+        result = `#${elem.id}`; // No need to recurse into ancestors in this case
+    } else {
+        let nthOfTypeIndex = 1;
+        let sibling = elem.parentNode.firstElementChild;
+        while (sibling !== elem) {
+            if (sibling.tagName === elem.tagName) {
+                nthOfTypeIndex++;
+            }
+            sibling = sibling.nextElementSibling;
         }
-        sibling = sibling.nextElementSibling;
+
+
+        const selector = `${elem.tagName}:nth-of-type(${nthOfTypeIndex})`;
+        result = elem === document.documentElement ? selector : `${toQuerySelector(elem.parentNode, cacheMap)} > ${selector}`;
     }
 
-    const selector = `${elem.tagName}:nth-of-type(${nthOfTypeIndex})`;
-    const result = elem === document.documentElement ? selector : `${toQuerySelector(elem.parentNode, cacheMap)} > ${selector}`;
     cacheMap.set(elem, result);
     return result;
 }
