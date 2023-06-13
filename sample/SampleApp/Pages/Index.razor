@@ -24,13 +24,31 @@ Welcome to your new app.
     </p>
     <p>Textarea: <textarea @bind="someText3"></textarea> [@someText3]</p>
     <p>
-        Radio:
-        <InputRadioGroup @bind-Value="@radioValue">
+        Radio1:
+        <InputRadioGroup @bind-Value="@radioValue1">
             <InputRadio Value="@("Val1")" /> Val1
             <InputRadio Value="@("Val2")" /> Val2
             <InputRadio Value="@("Val3")" /> Val3
         </InputRadioGroup>
-        [@radioValue]
+        [@radioValue1]
+    </p>
+    <p>
+        Radio2:
+        <InputRadioGroup @bind-Value="@radioValue2">
+            <InputRadio Value="@("Val1")" /> Val1
+            <InputRadio Value="@("Val2")" /> Val2
+            <InputRadio Value="@("Val3")" /> Val3
+        </InputRadioGroup>
+        [@radioValue2]
+    </p>
+    <p>
+        Radio3:
+        <InputRadioGroup @bind-Value="@radioValue3">
+            <InputRadio Value="@("Val1")" /> Val1
+            <InputRadio Value="@("Val2")" /> Val2
+            <InputRadio Value="@("Val3")" /> Val3
+        </InputRadioGroup>
+        [@radioValue3]
     </p>
 }
 
@@ -42,7 +60,9 @@ Welcome to your new app.
     string someText3 = "";
     string? selectValue;
     bool checkValue;
-    string? radioValue;
+    string? radioValue1;
+    string? radioValue2;
+    string? radioValue3;
 
     protected override async Task OnInitializedAsync()
     {
