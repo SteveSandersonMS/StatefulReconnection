@@ -85,12 +85,30 @@ function loadUIState() {
 }
 
 function saveUIState() {
-    const editableElements = document.querySelectorAll(['input', 'textarea', 'select']);
+    const editableElements = document.querySelectorAll(['input:not([type=radio])', 'textarea', 'select']);
+    const radioButtons = document.querySelectorAll('input[type=radio]');
     const selectorCacheMap = new Map();
     const uiState = {};
+
     editableElements.forEach(elem => {
         const selector = toQuerySelector(elem, selectorCacheMap);
         uiState[selector] = readElementValue(elem);
+    });
+
+    const radioGroups = {};
+    radioButtons.forEach(radioButton => {
+        const name = radioButton.name;
+        if (!radioGroups[name]) {
+            radioGroups[name] = [];
+        }
+        radioGroups[name].push(radioButton);
+    });
+    Object.values(radioGroups).forEach(group => {
+        const checkedRadioButton = group.find(radioButton => radioButton.checked);
+        if (checkedRadioButton) {
+            const selector = toQuerySelector(checkedRadioButton, selectorCacheMap);
+            uiState[selector] = readElementValue(checkedRadioButton);
+        }
     });
 
     if (document.activeElement) {
@@ -135,6 +153,8 @@ function toQuerySelector(elem, cacheMap) {
 function readElementValue(elem) {
     if (elem.type === 'checkbox') {
         return elem.checked;
+    } else if (elem.type === 'radio') {
+        return elem.checked ? elem.value : null;
     } else {
         return elem.value;
     }
@@ -143,10 +163,12 @@ function readElementValue(elem) {
 function writeElementValue(elem, value) {
     if (elem.type === 'checkbox') {
         elem.checked = value;
+    } else if (elem.type === 'radio') {
+        elem.checked = (elem.value === value);
     } else {
         elem.value = value;
     }
-    
+
     elem.dispatchEvent(new Event('input', { 'bubbles': true }));
     elem.dispatchEvent(new Event('change', { 'bubbles': true }));
 }
