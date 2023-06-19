@@ -1,7 +1,7 @@
 ﻿const sessionStorageKey = 'statefulReconnection.uiState';
 let isInitialized;
 
-export function init(overlayElem) {
+export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
     if (isInitialized) {
         throw new Error('Do not add more than one instance of <StatefulReconnection.Enable>');
     }
@@ -14,13 +14,8 @@ export function init(overlayElem) {
     const origOnConnectionDown = Blazor.defaultReconnectionHandler.onConnectionDown;
     Blazor.defaultReconnectionHandler.onConnectionDown = function(options, error) {
         saveUIState();
-
-        // If no custom options were set, change the defaults
-        if (options.maxRetries === 8 && options.retryIntervalMilliseconds === 20000) {
-            options.retryIntervalMilliseconds = 1000;
-            options.maxRetries = 10 * 60; // 10 minutes
-        }
-
+        options.retryIntervalMilliseconds = retryIntervalMilliseconds;
+        options.maxRetries = maxRetries;
         return origOnConnectionDown.call(this, options, error);
     }
 
@@ -34,24 +29,18 @@ export function init(overlayElem) {
 class BetterReconnectionDisplay {
     constructor(overlayElem) {
         this.overlayElem = overlayElem;
-        this.checkInternetElem = overlayElem.querySelector('.check-internet');
     }
 
     show() {
         this.overlayElem.classList.add('reconnect-visible');
-        this.checkInternetElem.style.display = 'none';
-        clearTimeout(this.showCheckConnectionTimer);
-        this.showCheckConnectionTimer = setTimeout(() => {
-            this.checkInternetElem.style.display = 'block';
-        }, 5000);
     }
 
     update(currentAttempt) {
+        
     }
 
     hide() {
         this.overlayElem.classList.remove('reconnect-visible');
-        clearTimeout(this.showCheckConnectionTimer);
     }
 
     failed() {

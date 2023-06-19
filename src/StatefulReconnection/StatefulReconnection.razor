@@ -6,15 +6,34 @@
 @namespace Microsoft.AspNetCore.Components.Web
 
 <div class="reconnect-overlay" @ref="overlay">
-    <div class="reconnect-dialog">
-        <div class="lds-ripple"><div></div><div></div></div>
-        <p>Rejoining the server...</p>
-        <p class="check-internet">Check your internet connection</p>
-        <button onclick="location.reload()" style="display: none">Reload</button>
-    </div>
+    @(ReconnectContent ?? DefaultContent)()
 </div>
 
 @code {
+    [Parameter]
+    public int MaxRetries { get; set; } = 10 * 60; // 10 minutes
+
+    [Parameter]
+    public int RetryIntervalMilliseconds { get; set; } = 1000;
+
+    [Parameter]
+    public RenderFragment? ReconnectContent { get; set; }
+
+    private RenderFragment DefaultContent => __builder =>
+    {
+        <div class="default-content">
+            <div class="lds-ripple"><div></div><div></div></div>
+            <p>Rejoining the server...</p>
+            @if (showCheckInternet)
+            {
+                <p class="check-internet">Check your internet connection</p>
+            }
+            <button onclick="location.reload()" style="display: none">Reload</button>
+        </div>
+    };
+
+    private bool showCheckInternet = false;
+    private Timer? timer;
     private ElementReference overlay;
     private Task<IJSObjectReference> _moduleLoader = default!;
     private bool _disposed;
@@ -34,9 +53,15 @@
             await quiescenceTask;
 
             var module = await _moduleLoader;
+
             if (!_disposed)
             {
-                await module.InvokeVoidAsync("init", overlay);
+                await module.InvokeVoidAsync("init", overlay, MaxRetries, RetryIntervalMilliseconds);
+                timer = new Timer(state =>
+                {
+                    showCheckInternet = true;
+                    InvokeAsync(StateHasChanged);
+                }, null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
             }
         }
     }
@@ -44,5 +69,6 @@
     public void Dispose()
     {
         _disposed = true;
+        timer?.Dispose();
     }
 }
