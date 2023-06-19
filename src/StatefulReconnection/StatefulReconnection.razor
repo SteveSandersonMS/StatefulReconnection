@@ -5,7 +5,7 @@
 @implements IDisposable
 @namespace Microsoft.AspNetCore.Components.Web
 
-<div class="reconnect-overlay" @ref="overlay">
+<div class="reconnect-overlay" @ref="_overlay">
     @(ReconnectContent ?? DefaultContent)()
 </div>
 
@@ -24,7 +24,7 @@
         <div class="default-content">
             <div class="lds-ripple"><div></div><div></div></div>
             <p>Rejoining the server...</p>
-            @if (showCheckInternet)
+            @if (_showCheckInternet)
             {
                 <p class="check-internet">Check your internet connection</p>
             }
@@ -32,9 +32,9 @@
         </div>
     };
 
-    private bool showCheckInternet = false;
-    private Timer? timer;
-    private ElementReference overlay;
+    private bool _showCheckInternet = false;
+    private Timer? _timer;
+    private ElementReference _overlay;
     private Task<IJSObjectReference> _moduleLoader = default!;
     private bool _disposed;
 
@@ -56,10 +56,10 @@
 
             if (!_disposed)
             {
-                await module.InvokeVoidAsync("init", overlay, MaxRetries, RetryIntervalMilliseconds);
-                timer = new Timer(state =>
+                await module.InvokeVoidAsync("init", _overlay, MaxRetries, RetryIntervalMilliseconds);
+                _timer = new Timer(state =>
                 {
-                    showCheckInternet = true;
+                    _showCheckInternet = true;
                     InvokeAsync(StateHasChanged);
                 }, null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
             }
@@ -69,6 +69,6 @@
     public void Dispose()
     {
         _disposed = true;
-        timer?.Dispose();
+        _timer?.Dispose();
     }
 }
