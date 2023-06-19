@@ -1,4 +1,33 @@
-﻿<StatefulReconnection />
+﻿@* Example #1: Default experience, with built-in UI and default reconnection parameters. *@
+<StatefulReconnection />
+
+@* Example #2: Default UI, with custom reconnection parameters. *@
+@* <StatefulReconnection MaxRetries="20" RetryIntervalMilliseconds="1000" /> *@
+
+@* Example #3: Custom UI and reconnection parameters, using Bootstrap classes, as an example. *@
+@* <StatefulReconnection MaxRetries="600" RetryIntervalMilliseconds="1000">
+    <ReconnectContent>
+        <div class="d-flex justify-content-center" style="margin-top: 10vh;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-0">Rejoining the server...</h5>
+                </div>
+                <div class="card-footer d-flex justify-content-center">
+                    <button class="btn btn-primary flex-grow-1" onclick="location.reload()">Reload</button>
+                </div>
+            </div>
+        </div>
+    </ReconnectContent>
+</StatefulReconnection> *@
+
+@* Example #4: Custom component, using bootstrap classes, demonstrating display of reconnection progress,
+               per provided reconnection parameters. This example takes advantage of the optional feedback
+               elements that can be populated by the StatefulReconnection.razor.js script. *@
+@* <CustomStatefulReconnection /> *@
+
+@* Example #5: Another custom component, using a bootstrap modal, demonstrating additional styling and
+               animation, with using Blazor CSS isolation.*@
+@* <AnotherCustomStatefulReconnection /> *@
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">

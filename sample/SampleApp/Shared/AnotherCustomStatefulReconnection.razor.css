@@ -1,36 +1,13 @@
-﻿.reconnect-overlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 10000;
-    display: none;
-    animation: reconnect-fade-in;
-    background-color: rgba(0,0,0,0.65);
+﻿.modal {
+    animation: reconnect-fadeInOpacity 0.3s ease-in;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-width: 1px;
+    border-radius: 0.5rem;
 }
 
-    .reconnect-overlay.reconnect-visible {
-        display: block;
-    }
-
-    .reconnect-overlay .default-content {
-        position: relative;
-        background-color: white;
-        width: 20rem;
-        margin: 20vh auto;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 3px 6px 2px rgba(0,0,0,0.3);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        opacity: 0;
-        animation: reconnect-slideUp 1.5s cubic-bezier(.05,.89,.25,1.02) 0.3s, reconnect-fadeInOpacity 0.5s ease-out 0.3s;
-        animation-fill-mode: forwards;
-        z-index: 10001;
-    }
+.reconnect-overlay.reconnect-visible .modal-dialog {
+    animation: reconnect-slideDown .5s ease-in-out forwards;
+}
 
 .lds-ripple {
     display: block;
@@ -95,12 +72,12 @@
     }
 }
 
-@keyframes reconnect-slideUp {
+@keyframes reconnect-slideDown {
     0% {
-        transform: translateY(30px) scale(0.95);
+        transform: translateY(-70px);
     }
 
     100% {
-        transform: translateY(0);
+        transform: translateY(70px);
     }
 }
