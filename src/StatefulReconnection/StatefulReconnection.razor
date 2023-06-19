@@ -6,12 +6,12 @@
 @namespace Microsoft.AspNetCore.Components.Web
 
 <div class="reconnect-overlay" @ref="_overlay">
-    @(ReconnectContent ?? DefaultContent)()
+    @(ReconnectContent ?? DefaultContent)
 </div>
 
 @code {
     [Parameter]
-    public int MaxRetries { get; set; } = 10 * 60; // 10 minutes
+    public int MaxRetries { get; set; } = 600;
 
     [Parameter]
     public int RetryIntervalMilliseconds { get; set; } = 1000;

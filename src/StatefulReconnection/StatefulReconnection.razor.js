@@ -48,7 +48,7 @@ export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
     }
 
     const origOnConnectionUp = Blazor.defaultReconnectionHandler.onConnectionUp;
-    Blazor.defaultReconnectionHandler.onConnectionUp = function () {
+    Blazor.defaultReconnectionHandler.onConnectionUp = function() {
         clearUIState();
 
         // Clear countdown timer

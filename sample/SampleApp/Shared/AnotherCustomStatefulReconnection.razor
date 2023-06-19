@@ -1,0 +1,24 @@
+﻿<StatefulReconnection MaxRetries=MaxRetries RetryIntervalMilliseconds=RetryIntervalMilliseconds>
+    <ReconnectContent>
+        <div class="modal fade d-block show" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Rejoining the server...</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="lds-ripple m-auto"><div></div><div></div></div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-primary flex-grow-1" onclick="location.reload()">Reload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ReconnectContent>
+</StatefulReconnection>
+
+@code {
+    public int MaxRetries { get; set; } = 25;
+    public int RetryIntervalMilliseconds { get; set; } = 1000;
+}
