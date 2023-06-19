@@ -1,0 +1,20 @@
+﻿<StatefulReconnection MaxRetries=MaxRetries RetryIntervalMilliseconds=RetryIntervalMilliseconds>
+    <ReconnectContent>
+        <div class="d-flex justify-content-center" style="margin-top: 10vh;">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Rejoining the server...</h5>
+                    <h6 class="mb-0">Retry time remaining: <span id="reconnectRetryTimeRemaining"></span></h6>
+                </div>
+                <div class="card-footer d-flex justify-content-center">
+                    <button class="btn btn-warning flex-grow-1" onclick="location.reload()">Reload</button>
+                </div>
+            </div>
+        </div>
+    </ReconnectContent>
+</StatefulReconnection>
+
+@code {
+    public int MaxRetries { get; set; } = 100;
+    public int RetryIntervalMilliseconds { get; set; } = 1000;
+}

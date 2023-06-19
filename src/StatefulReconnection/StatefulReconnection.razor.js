@@ -1,5 +1,7 @@
 ﻿const sessionStorageKey = 'statefulReconnection.uiState';
 let isInitialized;
+let countdownInterval;
+let remainingTime;
 
 export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
     if (isInitialized) {
@@ -8,20 +10,49 @@ export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
 
     isInitialized = true;
     loadUIState();
-
     Blazor.defaultReconnectionHandler._reconnectionDisplay = new BetterReconnectionDisplay(overlayElem);
+    remainingTime = maxRetries * retryIntervalMilliseconds;
 
     const origOnConnectionDown = Blazor.defaultReconnectionHandler.onConnectionDown;
     Blazor.defaultReconnectionHandler.onConnectionDown = function(options, error) {
         saveUIState();
         options.retryIntervalMilliseconds = retryIntervalMilliseconds;
         options.maxRetries = maxRetries;
+
+        // Start countdown timer (exposes countdownInterval to the frontend)
+        const countdownTimerElemCheck = setInterval(function () {
+            const countdownTimerElem = document.getElementById("reconnectRetryTimeRemaining");
+
+            // Does the user have a UI element with id=reconnectRetryTimeRemaining?
+            if (countdownTimerElem) {
+                countdownInterval = setInterval(() => {
+                    const hours = Math.floor(remainingTime / 3600000);
+                    const minutes = Math.floor((remainingTime % 3600000) / 60000);
+                    const seconds = Math.floor((remainingTime % 60000) / 1000);
+                    countdownTimerElem.textContent = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+                    remainingTime -= 1000;
+                    if (remainingTime < 0) {
+                        clearInterval(countdownInterval);
+                        countdownTimerElem.textContent = "Timeout";
+                    }
+                }, 1000);
+                clearInterval(countdownTimerElemCheck);
+            }
+        }, 100);
+
         return origOnConnectionDown.call(this, options, error);
     }
 
     const origOnConnectionUp = Blazor.defaultReconnectionHandler.onConnectionUp;
     Blazor.defaultReconnectionHandler.onConnectionUp = function() {
         clearUIState();
+
+        // Clear coundown timer
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
         return origOnConnectionUp.apply(this, arguments);
     }
 }

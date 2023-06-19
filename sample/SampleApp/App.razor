@@ -1,5 +1,5 @@
 ﻿@* Option #1: Default experience, with built-in UI and default reconnection parameters. *@
-<StatefulReconnection />
+@* <StatefulReconnection /> *@
 
 @* Option #2: Default UI with custom reconnection parameters. *@
 @* <StatefulReconnection MaxRetries="600" RetryIntervalMilliseconds="1000" /> *@
@@ -19,6 +19,9 @@
         </div>
     </ReconnectContent>
 </StatefulReconnection> *@
+
+@* Option #4: Use custom component (based on Option #3).*@
+<CustomStatefulReconnection />
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
