@@ -4,7 +4,15 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h5>Rejoining the server...</h5>
-                    <h6 class="mb-0">Retry time remaining: <span id="reconnectRetryTimeRemaining"></span></h6>
+                    <h6>Retry time remaining: <span id="reconnectRetryTimeRemaining"></span></h6>
+                    <div class="mt-3">
+                        <div class="progress" style="height: 20px;">
+                            <div id="reconnectProgressBar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="@MaxRetries">
+                                <span><span id="reconnectProgressPercentage"></span>%</span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Attempt: <span id="reconnectRetryCurrentAttempt"></span> out of @MaxRetries</small>
+                    </div>
                 </div>
                 <div class="card-footer d-flex justify-content-center">
                     <button class="btn btn-warning flex-grow-1" onclick="location.reload()">Reload</button>
@@ -15,6 +23,6 @@
 </StatefulReconnection>
 
 @code {
-    public int MaxRetries { get; set; } = 100;
+    public int MaxRetries { get; set; } = 25;
     public int RetryIntervalMilliseconds { get; set; } = 1000;
 }

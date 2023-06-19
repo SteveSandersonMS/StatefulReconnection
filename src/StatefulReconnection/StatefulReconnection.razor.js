@@ -1,7 +1,6 @@
 ﻿const sessionStorageKey = 'statefulReconnection.uiState';
 let isInitialized;
 let countdownInterval;
-let remainingTime;
 
 export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
     if (isInitialized) {
@@ -10,45 +9,49 @@ export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
 
     isInitialized = true;
     loadUIState();
-    Blazor.defaultReconnectionHandler._reconnectionDisplay = new BetterReconnectionDisplay(overlayElem);
-    remainingTime = maxRetries * retryIntervalMilliseconds;
+    const reconnectionDisplay = new BetterReconnectionDisplay(overlayElem, maxRetries, retryIntervalMilliseconds);
+    Blazor.defaultReconnectionHandler._reconnectionDisplay = reconnectionDisplay;
 
     const origOnConnectionDown = Blazor.defaultReconnectionHandler.onConnectionDown;
-    Blazor.defaultReconnectionHandler.onConnectionDown = function(options, error) {
+    Blazor.defaultReconnectionHandler.onConnectionDown = function (options, error) {
         saveUIState();
         options.retryIntervalMilliseconds = retryIntervalMilliseconds;
         options.maxRetries = maxRetries;
 
+        // If the user has a UI element with id=reconnectRetryMaxAttempts, update it
+        const maxAttemptsElem = document.getElementById("reconnectRetryMaxAttempts");
+        if (maxAttemptsElem) {
+            maxAttemptsElem.textContent = maxRetries;
+        }
+
         // Start countdown timer (exposes countdownInterval to the frontend)
-        const countdownTimerElemCheck = setInterval(function () {
+        countdownInterval = setInterval(() => {
             const countdownTimerElem = document.getElementById("reconnectRetryTimeRemaining");
 
-            // Does the user have a UI element with id=reconnectRetryTimeRemaining?
             if (countdownTimerElem) {
-                countdownInterval = setInterval(() => {
-                    const hours = Math.floor(remainingTime / 3600000);
-                    const minutes = Math.floor((remainingTime % 3600000) / 60000);
-                    const seconds = Math.floor((remainingTime % 60000) / 1000);
-                    countdownTimerElem.textContent = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                const avgTimePerRetry = Blazor.defaultReconnectionHandler._reconnectionDisplay.retryDurations.length > 0 ? (Blazor.defaultReconnectionHandler._reconnectionDisplay.retryDurations.reduce((a, b) => a + b, 0) / Blazor.defaultReconnectionHandler._reconnectionDisplay.retryDurations.length) : retryIntervalMilliseconds;
+                Blazor.defaultReconnectionHandler._reconnectionDisplay.remainingTime = (maxRetries - Blazor.defaultReconnectionHandler._reconnectionDisplay.retryDurations.length) * avgTimePerRetry;
 
-                    remainingTime -= 1000;
-                    if (remainingTime < 0) {
-                        clearInterval(countdownInterval);
-                        countdownTimerElem.textContent = "Timeout";
-                    }
-                }, 1000);
-                clearInterval(countdownTimerElemCheck);
+                const hours = Math.floor(Blazor.defaultReconnectionHandler._reconnectionDisplay.remainingTime / 3600000);
+                const minutes = Math.floor((Blazor.defaultReconnectionHandler._reconnectionDisplay.remainingTime % 3600000) / 60000);
+                const seconds = Math.floor((Blazor.defaultReconnectionHandler._reconnectionDisplay.remainingTime % 60000) / 1000);
+                countdownTimerElem.textContent = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+                if (Blazor.defaultReconnectionHandler._reconnectionDisplay.remainingTime < 0) {
+                    clearInterval(countdownInterval);
+                    countdownTimerElem.textContent = "Timeout";
+                }
             }
-        }, 100);
+        }, retryIntervalMilliseconds);
 
         return origOnConnectionDown.call(this, options, error);
     }
 
     const origOnConnectionUp = Blazor.defaultReconnectionHandler.onConnectionUp;
-    Blazor.defaultReconnectionHandler.onConnectionUp = function() {
+    Blazor.defaultReconnectionHandler.onConnectionUp = function () {
         clearUIState();
 
-        // Clear coundown timer
+        // Clear countdown timer
         if (countdownInterval) {
             clearInterval(countdownInterval);
         }
@@ -58,8 +61,13 @@ export function init(overlayElem, maxRetries, retryIntervalMilliseconds) {
 }
 
 class BetterReconnectionDisplay {
-    constructor(overlayElem) {
+    constructor(overlayElem, maxRetries, retryIntervalMilliseconds) {
         this.overlayElem = overlayElem;
+        this.maxRetries = maxRetries;
+        this.retryIntervalMilliseconds = retryIntervalMilliseconds;
+        this.retryDurations = [];
+        this.lastAttemptTimestamp = null;
+        this.remainingTime = maxRetries * retryIntervalMilliseconds;
     }
 
     show() {
@@ -67,7 +75,35 @@ class BetterReconnectionDisplay {
     }
 
     update(currentAttempt) {
-        
+        const currentTime = Date.now();
+
+        // Re-calculate remaining time
+        if (this.lastAttemptTimestamp !== null) {
+            const duration = currentTime - this.lastAttemptTimestamp;
+            this.retryDurations.push(duration);
+        }
+        this.lastAttemptTimestamp = currentTime;
+        const avgTimePerRetry = this.retryDurations.length > 0 ? (this.retryDurations.reduce((a, b) => a + b, 0) / this.retryDurations.length) : this.retryIntervalMilliseconds;
+        this.remainingTime = (this.maxRetries - currentAttempt) * avgTimePerRetry;
+
+        // If the user has a UI element with id=reconnectRetryCurrentAttempt, update it
+        const currentAttemptElem = document.getElementById("reconnectRetryCurrentAttempt");
+        if (currentAttemptElem) {
+            currentAttemptElem.textContent = currentAttempt;
+        }
+
+        // If the user has a UI element with id=reconnectProgressPercentage, update it
+        const reconnectProgressPercentageElem = document.getElementById("reconnectProgressPercentage");
+        if (reconnectProgressPercentageElem) {
+            const progressPercentage = Math.round((currentAttempt / this.maxRetries) * 100);
+            reconnectProgressPercentageElem.textContent = progressPercentage;
+
+            const reconnectProgressBarElem = document.getElementById("reconnectProgressBar");
+            if (reconnectProgressBarElem) {
+                reconnectProgressBarElem.style.width = `${progressPercentage}%`;
+                reconnectProgressBarElem.setAttribute('aria-valuenow', currentAttempt.toString());
+            }
+        }
     }
 
     hide() {
@@ -81,7 +117,7 @@ class BetterReconnectionDisplay {
     rejected() {
         location.reload();
     }
-} 
+}
 
 function loadUIState() {
     const stateJson = sessionStorage.getItem(sessionStorageKey);
