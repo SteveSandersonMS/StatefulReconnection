@@ -112,7 +112,7 @@ function toQuerySelector(elem, cacheMap) {
     let result;
 
     if (elem.id) {
-        result = `#${elem.id}`; // No need to recurse into ancestors in this case
+        result = `[id='${elem.id}']`; // No need to recurse into ancestors in this case
     } else {
         let nthOfTypeIndex = 1;
         let sibling = elem.parentNode.firstElementChild;
